@@ -6,3 +6,5 @@
 - [x] Add 'root' route to the app
 - [x] Add static files
 - [x] Add '404' page, as fallback
+- [x] Add custom middlewares. One to log the requests and the other to handle JSON in the request.
+- [x] Add custom catch-all route for error handling. It also logs the message to a log file.
