@@ -1,6 +1,6 @@
 # Fullstack TechNotes App
 
-• This app uses MERN Stack
+## This is the backend part of the Fullstack app
 
 - [x] Create an Express App
 - [x] Add 'root' route to the app
