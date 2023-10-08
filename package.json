@@ -4,9 +4,9 @@
 	"description": "TechNotes MERN Project",
 	"main": "server.js",
 	"scripts": {
-		"start": "node server",
-		"dev": "nodemon server",
-		"format": "prettier --write \"**/*.(js|jsx|json)\""
+		"start": "node src/server",
+		"dev": "nodemon src/server",
+		"format": "prettier --write \"src/**/*.(js|jsx|json)\""
 	},
 	"keywords": [],
 	"author": "",
