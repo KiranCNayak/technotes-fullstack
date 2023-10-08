@@ -10,7 +10,7 @@ const bcrypt = require("bcrypt")
 const getAllUsers = asyncHandler(async (_req, res) => {
 	// Here '-password' means there is no need to send the password in the result
 	const users = await User.find().select("-password").lean()
-	if (!users) {
+	if (!users?.length) {
 		return res.status(400).json({
 			message: "No users found!",
 		})
@@ -60,22 +60,22 @@ const createNewUser = asyncHandler(async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = asyncHandler(async (req, res) => {
-	const { id, username, roles, active, password } = req.body
+	const { _id, username, roles, isActive, password } = req.body
 
 	// Confirm the data provided in the request
 	if (
-		!id ||
+		!_id ||
 		!username ||
 		!Array.isArray(roles) ||
 		!roles.length ||
-		typeof active !== "boolean"
+		typeof isActive !== "boolean"
 	) {
 		return res.status(400).json({
 			message: "All fields are required",
 		})
 	}
 
-	const user = await User.findById(id).exec()
+	const user = await User.findById(_id).exec()
 
 	if (!user) {
 		return res.status(400).json({ message: "User not found" })
@@ -84,13 +84,13 @@ const updateUser = asyncHandler(async (req, res) => {
 	const duplicate = await User.findOne({ username }).lean().exec()
 
 	// Allow updates to the original user only. So check the ID field
-	if (duplicate && duplicate?._id.toString() !== id) {
+	if (duplicate && duplicate?._id.toString() !== _id) {
 		return res.status(409).json({
 			message: "Duplicate username",
 		})
 	}
 	user.username = username
-	user.active = active
+	user.isActive = isActive
 	user.roles = roles
 
 	// Hash the password, if there is a new password (to update)
@@ -109,25 +109,25 @@ const updateUser = asyncHandler(async (req, res) => {
 // @route DELETE /users
 // @access Private
 const deleteUser = asyncHandler(async (req, res) => {
-	const { id } = req.body
+	const { _id } = req.body
 
-	if (!id) {
+	if (!_id) {
 		return res.status(400).json({
 			message: "User ID is required",
 		})
 	}
 
-	const notes = await Note.findOne({ user: id }).lean().exec()
-	if (notes?.length) {
+	const notes = await Note.findOne({ user: _id }).lean().exec()
+	if (notes) {
 		return res.status(400).json({
 			message: "Can't delete user since they have assigned notes.",
 		})
 	}
 
-	const user = await User.findById(id).exec()
+	const user = await User.findById(_id).exec()
 
 	if (!user) {
-		return res.status.apply(400).json({
+		return res.status(400).json({
 			message: "User not found",
 		})
 	}
