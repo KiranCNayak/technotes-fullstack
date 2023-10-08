@@ -10,3 +10,4 @@
 - [x] Add custom catch-all route for error handling. It also logs the message to a log file.
 - [x] Add CORS with custom options
 - [x] Add mongoose to handle database connection
+- [x] Add CRUD capability for User model
