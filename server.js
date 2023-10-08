@@ -1,4 +1,8 @@
 const path = require("node:path")
+
+// Adding the 'dotenv' import in the server.js file, will make sure
+//  it isn't needed to be added again in any other files of the app
+require("dotenv").config()
 const express = require("express")
 const cookieParser = require("cookie-parser")
 const cors = require("cors")
