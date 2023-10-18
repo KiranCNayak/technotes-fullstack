@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 
 import './App.css';
 
@@ -10,16 +10,6 @@ import { Route, Routes } from 'react-router-dom';
 import Welcome from './features/auth/Welcome';
 import NotesList from './features/notes/NotesList';
 import UsersList from './features/users/UsersList';
-
-const Card = ({ row, col }) => {
-  return <div className="card">{CARDS_ARRAY[row][col]}</div>;
-};
-
-const CARDS_ARRAY = [
-  [1, 4, 2, 3],
-  [5, 3, 2, 6],
-  [6, 4, 1, 5],
-];
 
 function App() {
   return (
