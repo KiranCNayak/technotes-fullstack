@@ -45,7 +45,7 @@ const createNewUser = asyncHandler(async (req, res) => {
 
 	const userObject = { username, password: hashedPwd, roles }
 	const user = await User.create(userObject)
-	if (user) {
+	if (user instanceof User) {
 		res.status(201).json({
 			message: `New user ${username} created successfully!`,
 		})
