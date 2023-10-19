@@ -1,5 +1,5 @@
 {
-	"name": "technotes-fullstack",
+	"name": "technotes-backend",
 	"version": "1.0.0",
 	"description": "TechNotes MERN Project",
 	"main": "server.js",
