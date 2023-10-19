@@ -57,7 +57,7 @@ const EditUserForm = ({ user }) => {
 
   const onSaveUserClicked = async e => {
     await updateUser({
-      id: user.id,
+      _id: user.id,
       username,
       ...(password ? { password } : {}),
       roles,
@@ -66,7 +66,7 @@ const EditUserForm = ({ user }) => {
   };
 
   const onDeleteUserClicked = async () => {
-    await deleteUser({ id: user.id });
+    await deleteUser({ _id: user.id });
   };
 
   const options = Object.values(ROLES).map(role => {
