@@ -1,25 +1,30 @@
 import React, { useEffect, useState } from 'react';
+import { useUpdateUserMutation, useDeleteUserMutation } from './usersApiSlice';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSave } from '@fortawesome/free-solid-svg-icons';
-
+import { faSave, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { ROLES } from '../../config/roles';
-import { useAddNewUserMutation } from './usersApiSlice';
 
 const USER_REGEX = /^[A-z]{3,20}$/;
 const PWD_REGEX = /^[A-z0-9!@#$%]{4,12}$/;
 
-const NewUserForm = () => {
-  const [username, setUsername] = useState('');
+const EditUserForm = ({ user }) => {
+  const [username, setUsername] = useState(user.username);
   const [isValidUsername, setIsValidUsername] = useState(false);
   const [password, setPassword] = useState('');
   const [isValidPassword, setIsValidPassword] = useState(false);
   const [roles, setRoles] = useState(['Employee']);
+  const [isActive, setIsActive] = useState(user.isActive);
 
   const navigate = useNavigate();
 
-  const [addNewUser, { isLoading, isSuccess, isError, error }] =
-    useAddNewUserMutation();
+  const [updateUser, { isLoading, isSuccess, isError, error }] =
+    useUpdateUserMutation();
+
+  const [
+    deleteUser,
+    { isSuccess: isDelSuccess, isError: isDelError, error: delError },
+  ] = useDeleteUserMutation();
 
   useEffect(() => {
     setIsValidUsername(USER_REGEX.test(username));
@@ -30,34 +35,38 @@ const NewUserForm = () => {
   }, [password]);
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess || isDelSuccess) {
       setUsername('');
       setPassword('');
       setRoles([]);
       navigate('/dash/users');
     }
-  }, [isSuccess, navigate]);
+  }, [isSuccess, isDelSuccess, navigate]);
 
   const onUsernameChanged = e => setUsername(e.target.value);
   const onPasswordChanged = e => setPassword(e.target.value);
 
   const onRolesChanged = e => {
-    const values = Array.from(
-      e.target.selectedOptions, // This will be a 'HTMLCollection'
-      option => option.value,
-    );
+    const values = Array.from(e.target.selectedOptions, option => option.value);
     setRoles(values);
   };
 
-  const canSave =
-    [roles.length, isValidUsername, isValidPassword].every(Boolean) &&
-    !isLoading;
+  const onIsActiveChanged = () => {
+    setIsActive(prev => !prev);
+  };
 
   const onSaveUserClicked = async e => {
-    e.preventDefault();
-    if (canSave) {
-      await addNewUser({ username, password, roles });
-    }
+    await updateUser({
+      id: user.id,
+      username,
+      ...(password ? { password } : {}),
+      roles,
+      isActive,
+    });
+  };
+
+  const onDeleteUserClicked = async () => {
+    await deleteUser({ id: user.id });
   };
 
   const options = Object.values(ROLES).map(role => {
@@ -68,23 +77,45 @@ const NewUserForm = () => {
     );
   });
 
-  const errClass = isError ? 'errmsg' : 'offscreen';
+  let canSave;
+  if (password) {
+    canSave =
+      [roles.length, isValidUsername, isValidPassword].every(Boolean) &&
+      !isLoading;
+  } else {
+    canSave = [roles.length, isValidUsername].every(Boolean) && !isLoading;
+  }
+
+  const errClass = isError || isDelError ? 'errmsg' : 'offscreen';
   const validUserClass = !isValidUsername ? 'form__input--incomplete' : '';
-  const validPwdClass = !isValidPassword ? 'form__input--incomplete' : '';
+  const validPwdClass =
+    password && !isValidPassword ? 'form__input--incomplete' : '';
   const validRolesClass = !Boolean(roles.length)
     ? 'form__input--incomplete'
     : '';
 
+  const errContent = (error?.data?.message || delError?.data?.message) ?? '';
+
   const content = (
     <>
-      <p className={errClass}>{error?.data?.message}</p>
+      <p className={errClass}>{errContent}</p>
 
-      <form className="form" onSubmit={onSaveUserClicked}>
+      <form className="form" onSubmit={e => e.preventDefault()}>
         <div className="form__title-row">
-          <h2>New User</h2>
+          <h2>Edit User</h2>
           <div className="form__action-buttons">
-            <button className="icon-button" title="Save" disabled={!canSave}>
+            <button
+              className="icon-button"
+              title="Save"
+              disabled={!canSave}
+              onClick={onSaveUserClicked}>
               <FontAwesomeIcon icon={faSave} />
+            </button>
+            <button
+              className="icon-button"
+              title="Delete"
+              onClick={onDeleteUserClicked}>
+              <FontAwesomeIcon icon={faTrashCan} />
             </button>
           </div>
         </div>
@@ -115,6 +146,20 @@ const NewUserForm = () => {
           onChange={onPasswordChanged}
         />
 
+        <label
+          className="form__label form__checkbox-container"
+          htmlFor="user-active">
+          ACTIVE:
+          <input
+            className="form__checkbox"
+            id="user-active"
+            name="user-active"
+            type="checkbox"
+            checked={isActive}
+            onChange={onIsActiveChanged}
+          />
+        </label>
+
         <label className="form__label" htmlFor="roles">
           ASSIGNED ROLES:
         </label>
@@ -122,6 +167,7 @@ const NewUserForm = () => {
           className={`form__input ${validRolesClass}`}
           id="roles"
           name="roles"
+          type="text"
           multiple={true}
           size="3"
           value={roles}
@@ -135,4 +181,4 @@ const NewUserForm = () => {
   return content;
 };
 
-export default NewUserForm;
+export default EditUserForm;
